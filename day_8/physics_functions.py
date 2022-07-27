@@ -106,8 +106,8 @@ def calc_tau(SZA_in_deg, density_in_m3, scale_height_in_km, cross_section):
     tau = np.zeros((nWaves, nAlts))
 
     # calculate Tau:
-    iWave = 5
-    tau[iWave][:] = integrated_density * cross_section[iWave]
+    for iWave in range(nWaves):
+        tau[iWave][:] = integrated_density * cross_section[iWave]
 
     return tau
 
@@ -133,16 +133,16 @@ def calculate_Qeuv(density_in_m3,
 
     Qeuv = np.zeros(nAlts)
 
-    iWave = 5
+    for iWave in range(nWaves):
 
     # intensity is a function of altitude (for a given wavelength):
-    intensity = intensity_inf[iWave] * np.exp(-tau[iWave][:])
-    Qeuv = Qeuv + \
-        efficiency * \
-        density_in_m3 * \
-        intensity * \
-        cross_section[iWave] * \
-        energies[iWave]
+        intensity = intensity_inf[iWave] * np.exp(-tau[iWave][:])
+        Qeuv = Qeuv + \
+            efficiency * \
+            density_in_m3 * \
+            intensity * \
+            cross_section[iWave] * \
+            energies[iWave]
 
     return Qeuv
 
