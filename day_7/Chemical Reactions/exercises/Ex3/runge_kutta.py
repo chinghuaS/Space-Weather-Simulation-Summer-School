@@ -75,7 +75,18 @@ def adaptive_explicit_RK_stepper(f,x,t,h,a,b,c,b_control):
             x_new - estimate of state at time t + h
             error - estimate of the accuracy
     """
-    return ... # please complete this function 
+    s = len(c)
+    ks = [f(x,t)]
+    x_new = x + h*b[0]*ks[0]
+    for i in range(s-1):
+        y = x + h*sum(a[i][j]*ks[j] for j in range(i+1))
+        ks.append(f(y, t+h*c[i+1]))
+        x_new += h*b[i+1]*ks[-1]
+        
+  ###      error= h* sum(b[i]-)
+    
+    
+    return x_new, norm(error) # please complete this function 
                # hint: 
                # It should be a rather simple adaptation of 
                # explicit_RK_stepper
@@ -106,6 +117,12 @@ def adaptive_integrate(f, x0, tspan, h, step, rtol = 1e-8, atol = 1e-8):
             ts - time points visited during integration (list)
             xs - trajectory of the system (list of numpy arrays)
     """
+    t, tf = tspan
+    x=x0
+    traj=[x]
+    ts=[t]
+    while t<tf:
+        h_eff=
     return ... # please complete this function 
                # Hint 1: The slide contain pseudo code that should be a good 
                #         starting ground!
