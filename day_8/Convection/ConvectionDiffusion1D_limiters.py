@@ -28,7 +28,7 @@ nu = 0.01
 c = 2
 
 "Scheme parameters"
-beta = 1
+beta = -1
 
 "Number of points"
 N = 32
@@ -36,7 +36,7 @@ Dx = 1/N
 x = np.linspace(0,1,N+1)
 
 "Time parameters"
-dt = 0.1
+dt = 0.05
 time = np.arange(0,3+dt,dt)
 nt = np.size(time)
 

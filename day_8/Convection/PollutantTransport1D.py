@@ -25,17 +25,17 @@ __email__ = 'jvilap@mit.edu'
 import numpy as np
 import matplotlib.pyplot as plt
 from math import pi
-%matplotlib qt
+
 plt.close()
 import matplotlib.animation as animation
 
 "Flow parameters"
-nu = 0.01
+nu = 0   #viscosity
 c = -2
 u0 = 0
 
 "Scheme parameters"
-beta = 0
+beta = 1
 
 "Number of points"
 N = 32
@@ -52,6 +52,8 @@ nt = np.size(time)
 "Initialize solution variable"
 U = np.zeros((N+1,nt))
 
+# selector
+order=2
 
 for it in range(nt-1):
 
@@ -60,7 +62,24 @@ for it in range(nt-1):
     Diff = nu*(1/Dx**2)*(2*np.diag(np.ones(N+1)) - np.diag(np.ones(N),-1) - np.diag(np.ones(N),1))
 
     "Advection term:"
-        
+    cp=max(c,0)
+    cm=min(c,0)
+    if order<2:
+        Advp = cp*(np.diag(np.ones(N+1))-np.diag(np.ones(N),-1))
+        Advm = cm*(np.diag(np.ones(N+1))-np.diag(np.ones(N), 1))
+    else:
+        Advp = cp*(1.5*np.diag(np.ones(N+1))-2*np.diag(np.ones(N),-1)+.5*np.diag(np.ones(N-1),-2))
+        Advm = cm*(1.5*np.diag(np.ones(N+1))-2*np.diag(np.ones(N), 1)+.5*np.diag(np.ones(N-1), 2))
+
+    Adv = (1/Dx)*(Advp-Advm)
+    A = Diff + Adv
+    "Source term"
+    F = np.ones(N+1)
+    
+    A=A+ (1/dt)*np.diag(np.ones(N+1))
+    F=F+ U[:,it]/dt
+    
+    """
     "Sensor"
     U0 = U[:,it]
     uaux = np.concatenate(([U0[0]], U0,[U0[N]]))
@@ -93,7 +112,7 @@ for it in range(nt-1):
         
     Adv = (1/Dx)*(Ahigh + Alow)
     A = Diff + Adv
-    
+    """
     "Source term"
     sine = np.sin(2*pi*time[it+1])
     sineplus = 0.5*(sine + np.abs(sine))
@@ -101,14 +120,17 @@ for it in range(nt-1):
     
     "Temporal terms"
     A = A + (1/dt)*np.diag(np.ones(N+1))
-    F = F + U0/dt
+    F = F + U[:,it]/dt
 
     "Boundary condition at x=0"
     A[0,:] = (1/Dx)*np.concatenate(([1.5, -2, 0.5],np.zeros(N-2)))
     F[0] = 0
 
     "Boundary condition at x=1"
-    A[N,:] = np.concatenate((np.zeros(N),[1]))
+#    A[N,:] = np.concatenate((np.zeros(N),[1]))
+#    F[N] = u0
+    # u"(1)=0
+    A[N,:] = (1/Dx**2)*np.concatenate((np.zeros(N-2),[1,-2,1]))
     F[N] = u0
 
 

@@ -18,16 +18,18 @@ __email__ = 'jvilap@mit.edu'
 import numpy as np
 import matplotlib.pyplot as plt
 from math import pi
-%matplotlib qt
-plt.close()
+#plt.close()
 import matplotlib.animation as animation
 
 "Flow parameters"
 nu = 0.01
 c = 2
 
+# selector
+order=2
+
 "Number of points"
-N = 128
+N =128
 Dx = 1/N
 x = np.linspace(0,1,N+1)
 
@@ -35,8 +37,12 @@ x = np.linspace(0,1,N+1)
 "Diffusion term"
 Diff = nu*(1/Dx**2)*(2*np.diag(np.ones(N-1)) - np.diag(np.ones(N-2),-1) - np.diag(np.ones(N-2),1))
 "Advection term: centered differences"
-Advp = -0.5*c*np.diag(np.ones(N-2),-1)
-Advm = -0.5*c*np.diag(np.ones(N-2),1)
+if order <2:
+    Advp = max(c,0)*(np.diag(np.ones(N-1))-np.diag(np.ones(N-2),-1))
+    Advm = min(c,0)*(np.diag(np.ones(N-1))-np.diag(np.ones(N-2),1))
+else:
+    Advp = -0.5*c*np.diag(np.ones(N-2),-1)
+    Advm = -0.5*c*np.diag(np.ones(N-2),1)
 Adv = (1/Dx)*(Advp-Advm)
 A = Diff + Adv
 "Source term"
