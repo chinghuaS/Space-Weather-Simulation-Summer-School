@@ -25,21 +25,83 @@ N = 8
 Dx = 1/N
 x = np.linspace(0,1,N+1)
 
-"System matrix and RHS term"
-A = (1/Dx**2)*(2*np.diag(np.ones(N-1)) - np.diag(np.ones(N-2),-1) - np.diag(np.ones(N-2),1))
-F = (3*x[1:N] + x[1:N]**2)*np.exp(x[1:N])
+"time parameters"
+dt=1/24
+time = np.arange(0,3+dt,dt)
+nt=len(time)
 
+order=2
+
+if order<2:
+    U=np.zeros(N+1,nt)
+    U[:,1]
+else:
+    U=np.zeros(N+2,nt)
+    
+for it in range(nt):
+    "System matrix and RHS term"
+    A = (1/Dx**2)*(2*np.diag(np.ones(N-1)) - np.diag(np.ones(N-2),-1) - np.diag(np.ones(N-2),1))
+    F = (3*x[1:N] + x[1:N]**2)*np.exp(x[1:N])
+
+    A= A+(1/dt)*np.diag(np.ones(N+1))
+    F= F+(1/dt)*U[:,it]
+    
+    A[0,:]=np.concatenate([[1],np.zeros(N)])
+    F[0]=0
+    A[-1,:]=(.5/Dx)*np.concatenate([np.zeros(N-1),[-1,0,1]])
+    F[-1]=0    
 "Solution of the linear system AU=F"
 U = np.linalg.solve(A,F)
 u = np.concatenate(([0],U,[0]))
 ua = -x*(x-1)*np.exp(x)
+#%% extand the matrix A w/ conditions u(0)=u(n)=0; exactlly the same as privios block
+A = (1/Dx**2)*(2*np.diag(np.ones(N+1)) - np.diag(np.ones(N),-1) - np.diag(np.ones(N),1))
+F = (3*x + x**2)*np.exp(x)
+# boundary conditions
+A[0,:]=np.concatenate([[1],np.zeros(N)])
+F[0]=0
 
+A[N,:]=np.concatenate([np.zeros(N),[1]])
+F[N]=0
+
+U = np.linalg.solve(A,F)
+u=U
+ua = -x*(x-1)*np.exp(x)+1
+
+#%% w/ conditions u(0)=u'(n)=0;
+A = (1/Dx**2)*(2*np.diag(np.ones(N+1)) - np.diag(np.ones(N),-1) - np.diag(np.ones(N),1))
+F = 2*(2*x**2+5*x-2)*np.exp(x)
+
+#%% 1st & 2nd order approximation
+A[0,:]=np.concatenate([[1],np.zeros(N)])
+F[0]=0
+
+if order<2:
+    A[N,:]=(1/Dx)*np.concatenate([np.zeros(N-1),[-1],[1]])
+else:
+    A[N,:]=(1/Dx)*np.concatenate([np.zeros(N-2),[.5],[-2],[1.5]])
+F[N]=0
+
+U = np.linalg.solve(A,F)
+u=U
+ua = 2*x*(3-2*x)*np.exp(x)
+
+#%% 2nd order approximation
+#A[0,:]=np.concatenate([[1],np.zeros(N)])
+#F[0]=0
+#A[N,:]=(1/Dx)*np.concatenate([np.zeros(N-2),[.5],[-2],[1.5]])
+#F[N]=0
+#U = np.linalg.solve(A,F)
+#u=U
+#ua = 2*x*(3-2*x)*np.exp(x)
+
+#%% plot
 "Plotting solution"
 plt.plot(x,ua,'-r',linewidth=2,label='$u_a$')
 plt.plot(x,u,':ob',linewidth=2,label='$\widehat{u}$')
 plt.legend(fontsize=12,loc='upper left')
 plt.grid()
-plt.axis([0, 1,0, 0.5])
+#plt.axis([0, 1,0, 0.5])
 plt.xlabel("x",fontsize=16)
 plt.ylabel("u",fontsize=16)
 
@@ -47,9 +109,7 @@ plt.ylabel("u",fontsize=16)
 error = np.max(np.abs(u-ua))
 print("Linf error u: %g\n" % error)
 
-
-
-
-
-
+#%% reeor ratio
+# err8=error
+# err16/err8 ~=.25
 
